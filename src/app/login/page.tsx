@@ -1,38 +1,33 @@
 'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext'; // Import useAuth hook
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth(); // Use the login function from AuthContext
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
+    setLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (response.ok) {
-        router.push('/dashboard');
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Login failed');
-      }
+      await login(email, password); // Use the login function from AuthContext
+      router.push('/dashboard');
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      console.error('Login error:', err);
+      setError(`Login failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,7 +65,9 @@ export default function LoginPage() {
             {error && <p className="text-red-500 mt-2">{error}</p>}
           </CardContent>
           <CardFooter className="flex flex-col">
-            <Button className="w-full" type="submit">Login</Button>
+            <Button className="w-full" type="submit" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
+            </Button>
             <p className="mt-2 text-sm text-center">
               Don't have an account? <Link href="/signup" className="text-blue-500 hover:underline">Sign up</Link>
             </p>

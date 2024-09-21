@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose'
+import mongoose, { Schema, Document, Model } from 'mongoose'
 import bcrypt from 'bcryptjs'
 
 export interface IUser extends Document {
@@ -7,9 +7,16 @@ export interface IUser extends Document {
   password: string
   createdAt: Date
   updatedAt: Date
+  comparePassword(candidatePassword: string): Promise<boolean>
 }
 
-const UserSchema: Schema = new Schema({
+interface IUserMethods {
+  comparePassword(candidatePassword: string): Promise<boolean>
+}
+
+type UserModel = Model<IUser, {}, IUserMethods>
+
+const UserSchema = new Schema<IUser, UserModel, IUserMethods>({
   name: {
     type: String,
     required: [true, 'Please provide a name'],
@@ -27,14 +34,12 @@ const UserSchema: Schema = new Schema({
   password: {
     type: String,
     required: [true, 'Please provide a password'],
-    minlength: [6, 'Password must be at least 6 characters long'],
-    select: false
+    minlength: [6, 'Password must be at least 6 characters long']
   }
 }, {
   timestamps: true
 })
 
-// Hash password before saving
 UserSchema.pre<IUser>('save', async function(next) {
   if (!this.isModified('password')) {
     return next();
@@ -48,4 +53,11 @@ UserSchema.pre<IUser>('save', async function(next) {
   }
 });
 
-export const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema)
+UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+export const User = mongoose.models.User || mongoose.model<IUser, UserModel>('User', UserSchema);
+
+// This line ensures that the User model has the correct type
+export type UserDocument = IUser;

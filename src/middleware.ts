@@ -9,12 +9,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  const payload = verifyToken(token)
-  if (!payload) {
+  try {
+    const payload = verifyToken(token)
+    if (!payload) {
+      throw new Error('Invalid token')
+    }
+    // If the token is valid, allow the request to proceed
+    return NextResponse.next()
+  } catch (error) {
+    // If the token is invalid or expired, redirect to login
     return NextResponse.redirect(new URL('/login', request.url))
   }
-
-  return NextResponse.next()
 }
 
 export const config = {
