@@ -5,9 +5,9 @@ import { TaskDocument } from '@/models/Task';
 
 interface TaskContextType {
   tasks: TaskDocument[];
-  addTask: (task: TaskDocument) => void;
-  updateTask: (id: string, updatedTask: Partial<TaskDocument>) => void;
-  deleteTask: (id: string) => void;
+  addTask: (task: TaskDocument) => Promise<void>;
+  updateTask: (id: string, updatedTask: Partial<TaskDocument>) => Promise<void>;
+  deleteTask: (id: string) => Promise<void>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -24,21 +24,21 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tasks, setTasks] = useState<TaskDocument[]>([]);
 
   useEffect(() => {
-    // Fetch tasks from API
-    const fetchTasks = async () => {
-      try {
-        const response = await fetch('/api/tasks');
-        if (response.ok) {
-          const data = await response.json();
-          setTasks(data);
-        }
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-      }
-    };
-
     fetchTasks();
   }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch('/api/tasks');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setTasks(data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
 
   const addTask = async (task: TaskDocument) => {
     try {
@@ -48,12 +48,15 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify(task),
       });
 
-      if (response.ok) {
-        const newTask = await response.json();
-        setTasks(prevTasks => [...prevTasks, newTask]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const newTask = await response.json();
+      setTasks(prevTasks => [...prevTasks, newTask]);
     } catch (error) {
       console.error('Error adding task:', error);
+      throw error;
     }
   };
 
@@ -65,14 +68,17 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify(updatedTask),
       });
 
-      if (response.ok) {
-        const updated = await response.json();
-        setTasks(prevTasks =>
-          prevTasks.map(task => (task._id.toString() === id ? { ...task, ...updated } : task))
-        );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const updated = await response.json();
+      setTasks(prevTasks =>
+        prevTasks.map(task => (task._id.toString() === id ? { ...task, ...updated } : task))
+      );
     } catch (error) {
       console.error('Error updating task:', error);
+      throw error;
     }
   };
 
@@ -81,12 +87,15 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await fetch(`/api/tasks/${id}`, {
         method: 'DELETE',
       });
-
-      if (response.ok) {
-        setTasks(prevTasks => prevTasks.filter(task => task._id.toString() !== id));
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+  
+      setTasks(prevTasks => prevTasks.filter(task => task._id.toString() !== id));
     } catch (error) {
       console.error('Error deleting task:', error);
+      throw error;
     }
   };
 

@@ -1,27 +1,25 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { verifyToken } from './lib/auth'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('auth_token')?.value
+  const authToken = request.cookies.get('auth_token');
+  console.log('Middleware - Auth token:', authToken ? 'Present' : 'Not present');
+  console.log('Middleware - Current path:', request.nextUrl.pathname);
 
-  if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  if (!authToken && request.nextUrl.pathname.startsWith('/dashboard')) {
+    console.log('Middleware - Redirecting to login');
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  try {
-    const payload = verifyToken(token)
-    if (!payload) {
-      throw new Error('Invalid token')
-    }
-    // If the token is valid, allow the request to proceed
-    return NextResponse.next()
-  } catch (error) {
-    // If the token is invalid or expired, redirect to login
-    return NextResponse.redirect(new URL('/login', request.url))
+  if (authToken && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
+    console.log('Middleware - Redirecting to dashboard');
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
+
+  console.log('Middleware - Continuing to route');
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
-}
+  matcher: ['/dashboard/:path*', '/login', '/signup'],
+};

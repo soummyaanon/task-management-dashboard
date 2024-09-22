@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext'; // Import useAuth hook
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -14,15 +14,18 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAuth(); // Use the login function from AuthContext
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await login(email, password); // Use the login function from AuthContext
+      console.log('Attempting login...');
+      await login(email, password);
+      console.log('Login successful, attempting to redirect...');
       router.push('/dashboard');
+      console.log('Redirect initiated.');
     } catch (err) {
       console.error('Login error:', err);
       setError(`Login failed: ${err instanceof Error ? err.message : String(err)}`);

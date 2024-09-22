@@ -1,15 +1,16 @@
 // src/components/KanbanBoard.tsx
-'use client';
-
 import React from 'react';
-import { useTaskContext } from '@/context/TaskContext';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { TaskDocument } from '@/models/Task';
+
+interface KanbanBoardProps {
+  tasks: TaskDocument[];
+  updateTask: (id: string, updates: Partial<TaskDocument>) => Promise<void>;
+}
 
 const statuses = ['To Do', 'In Progress', 'Completed'];
 
-export default function KanbanBoard() {
-  const { tasks, updateTask } = useTaskContext();
-
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, updateTask }) => {
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
@@ -32,7 +33,7 @@ export default function KanbanBoard() {
                   {tasks
                     .filter((task) => task.status === status)
                     .map((task, index) => (
-                      <Draggable key={task._id} draggableId={task._id} index={index}>
+                      <Draggable key={task._id.toString()} draggableId={task._id.toString()} index={index}>
                         {(provided) => (
                           <div
                             ref={provided.innerRef}
@@ -55,4 +56,6 @@ export default function KanbanBoard() {
       </div>
     </DragDropContext>
   );
-}
+};
+
+export default KanbanBoard;
