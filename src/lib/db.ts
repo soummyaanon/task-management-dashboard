@@ -11,27 +11,19 @@ interface MongooseCache {
   promise: Promise<typeof mongoose> | null;
 }
 
-declare global {
-  var mongooseCache: MongooseCache | undefined;
-}
-
-let cached = global.mongooseCache;
-
-if (!cached) {
-  cached = global.mongooseCache = { conn: null, promise: null };
-}
+const mongooseCache: MongooseCache = { conn: null, promise: null };
 
 export async function connectToDatabase() {
-  if (cached!.conn) {
-    return cached?.conn;
+  if (mongooseCache.conn) {
+    return mongooseCache.conn;
   }
 
-  if (cached && !cached.promise) {
+  if (!mongooseCache.promise) {
     const opts = {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+    mongooseCache.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
       console.log('Connected to MongoDB');
       return mongoose;
     }).catch((error) => {
@@ -41,16 +33,12 @@ export async function connectToDatabase() {
   }
 
   try {
-    if (cached && cached.promise) {
-      cached.conn = await cached.promise;
-    }
+    mongooseCache.conn = await mongooseCache.promise;
   } catch (e) {
     console.error('Error while awaiting MongoDB connection:', e);
-    if (cached) {
-      cached.promise = null;
-    }
+    mongooseCache.promise = null;
     throw e;
   }
 
-  return cached?.conn ?? null;
+  return mongooseCache.conn ?? null;
 }

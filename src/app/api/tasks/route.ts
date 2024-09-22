@@ -3,7 +3,7 @@ import { connectToDatabase } from '@/lib/db';
 import { Task, ITask } from '@/models/Task';
 import { verifyToken, getAuthCookie } from '@/lib/auth';
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const token = getAuthCookie();
     if (!token) {

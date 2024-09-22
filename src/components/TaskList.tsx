@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import TaskForm from './TaskForm';
 import TaskCard from './TaskCard';
 import { TaskDocument } from '@/models/Task';
-import { Plus, Search } from 'lucide-react';
+import { Plus, } from 'lucide-react';
 
 interface TaskListProps {
   tasks: TaskDocument[];

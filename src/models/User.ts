@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose'
+import mongoose, { Schema, Document, Model, CallbackError } from 'mongoose'
 import bcrypt from 'bcryptjs'
 
 export interface IUser extends Document {
@@ -14,7 +14,7 @@ interface IUserMethods {
   comparePassword(candidatePassword: string): Promise<boolean>
 }
 
-type UserModel = Model<IUser, {}, IUserMethods>
+type UserModel = Model<IUser, object, IUserMethods>
 
 const UserSchema = new Schema<IUser, UserModel, IUserMethods>({
   name: {
@@ -48,8 +48,8 @@ UserSchema.pre<IUser>('save', async function(next) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-  } catch (error: any) {
-    next(error);
+  } catch (error) {
+    next(error as CallbackError);
   }
 });
 

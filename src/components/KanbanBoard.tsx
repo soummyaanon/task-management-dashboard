@@ -1,25 +1,23 @@
-// src/components/KanbanBoard.tsx
-import React from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { TaskDocument } from '@/models/Task';
+'use client'
 
-interface KanbanBoardProps {
-  tasks: TaskDocument[];
-  updateTask: (id: string, updates: Partial<TaskDocument>) => Promise<void>;
-}
+import React from 'react'
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd'
+import { useTaskContext } from '@/context/TaskContext'
 
-const statuses = ['To Do', 'In Progress', 'Completed'];
+const statuses = ['To Do', 'In Progress', 'Completed']
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, updateTask }) => {
+const KanbanBoard: React.FC = () => {
+  const { tasks, updateTask } = useTaskContext()
+
   const onDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
+    if (!result.destination) return
 
-    const { source, destination, draggableId } = result;
+    const { source, destination, draggableId } = result
 
     if (source.droppableId !== destination.droppableId) {
-      updateTask(draggableId, { status: destination.droppableId as 'To Do' | 'In Progress' | 'Completed' });
+      updateTask(draggableId, { status: destination.droppableId as 'To Do' | 'In Progress' | 'Completed' })
     }
-  };
+  }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -29,7 +27,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, updateTask }) => {
             <h2 className="text-lg font-semibold mb-4">{status}</h2>
             <Droppable droppableId={status}>
               {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
+                <div {...provided.droppableProps} ref={provided.innerRef} className="min-h-[200px]">
                   {tasks
                     .filter((task) => task.status === status)
                     .map((task, index) => (
@@ -55,7 +53,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, updateTask }) => {
         ))}
       </div>
     </DragDropContext>
-  );
-};
+  )
+}
 
-export default KanbanBoard;
+export default KanbanBoard

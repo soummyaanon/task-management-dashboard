@@ -1,48 +1,48 @@
-'use client';
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useTaskContext } from '@/context/TaskContext';
-import TaskList from '@/components/TaskList';
-import TaskForm from '@/components/TaskForm';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle, List, BarChart2, Layout } from 'lucide-react';
-import KanbanBoard from '@/components/KanbanBoard';
-import { TaskDocument } from '@/models/Task';
+import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/context/AuthContext'
+import { useTaskContext } from '@/context/TaskContext'
+import TaskList from '@/components/TaskList'
+import TaskForm from '@/components/TaskForm'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PlusCircle, List, BarChart2, Layout } from 'lucide-react'
+import KanbanBoard from '@/components/KanbanBoard'
+import { TaskDocument } from '@/models/Task'
 
 export default function DashboardPage() {
-  const { user, checkLoginStatus } = useAuth();
-  const { tasks, addTask, updateTask } = useTaskContext();
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [showTaskForm, setShowTaskForm] = useState(false);
+  const { user, checkLoginStatus } = useAuth()
+  const { tasks, addTask } = useTaskContext()
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(true)
+  const [showTaskForm, setShowTaskForm] = useState(false)
 
   useEffect(() => {
     const init = async () => {
-      await checkLoginStatus();
+      await checkLoginStatus()
       if (!user) {
-        router.push('/login');
+        router.push('/login')
       } else {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
-    init();
-  }, [checkLoginStatus, router, user]);
+    }
+    init()
+  }, [checkLoginStatus, router, user])
 
   const handleSubmit = (task: Partial<TaskDocument>) => {
-    addTask(task as TaskDocument);
-    setShowTaskForm(false);
-  };
+    addTask(task as TaskDocument)
+    setShowTaskForm(false)
+  }
 
   const handleCancel = () => {
-    setShowTaskForm(false);
-  };
+    setShowTaskForm(false)
+  }
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-full">Loading...</div>;
+    return <div className="flex justify-center items-center h-full">Loading...</div>
   }
 
   return (
@@ -79,7 +79,7 @@ export default function DashboardPage() {
         </TabsContent>
         <TabsContent value="kanban">
           <Card className="p-4">
-            <KanbanBoard tasks={tasks} updateTask={updateTask} />
+            <KanbanBoard />
           </Card>
         </TabsContent>
         <TabsContent value="stats">
@@ -92,5 +92,5 @@ export default function DashboardPage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

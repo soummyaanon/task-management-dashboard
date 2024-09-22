@@ -72,7 +72,7 @@ export default function LoginPage() {
               {loading ? 'Logging in...' : 'Login'}
             </Button>
             <p className="mt-2 text-sm text-center">
-              Don't have an account? <Link href="/signup" className="text-blue-500 hover:underline">Sign up</Link>
+              Don&apos;t have an account? <Link href="/signup" className="text-blue-500 hover:underline">Sign up</Link>
             </p>
           </CardFooter>
         </form>
