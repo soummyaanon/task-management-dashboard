@@ -23,9 +23,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const checkLoginStatus = useCallback(async () => {
+    console.log('checkLoginStatus called');
     try {
       console.log('Checking login status...');
-      const response = await fetch('/api/auth/me', { cache: 'no-store' });
+      const response = await fetch('/api/auth/me', { cache: 'no-store', credentials: 'include' });
       console.log('Login status response:', response.status);
       if (response.ok) {
         const userData = await response.json();
@@ -44,8 +45,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    console.log('useEffect called');
     checkLoginStatus();
-  }, [checkLoginStatus]);
+  }, [checkLoginStatus]); // Empty dependency array ensures this runs only once
 
   const login = async (email: string, password: string) => {
     setLoading(true);
@@ -54,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
       console.log('Login response status:', response.status);
@@ -77,7 +80,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
       if (response.ok) {
         setUser(null);
       } else {

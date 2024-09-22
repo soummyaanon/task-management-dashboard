@@ -1,36 +1,32 @@
-import { NextResponse, NextRequest } from 'next/server';
+// src/app/api/auth/me/route.ts
+import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { User } from '@/models/User';
 import { verifyToken } from '@/lib/auth';
+import { cookies } from 'next/headers';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
   try {
-    const token = req.cookies.get('auth_token');
-    
-    if (!token || !token.value) {
-      console.log('No auth token found');
+    const token = cookies().get('auth_token')?.value;
+
+    if (!token) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = verifyToken(token.value);
-    
-    if (!payload || !payload.userId) {
-      console.log('Invalid token or missing userId');
+    const payload = verifyToken(token);
+
+    if (!payload) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     await connectToDatabase();
-    
+
     const user = await User.findById(payload.userId).select('-password');
-    
+
     if (!user) {
-      console.log('User not found for id:', payload.userId);
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    console.log('User found:', user.email);
     return NextResponse.json({
       id: user._id,
       name: user.name,
